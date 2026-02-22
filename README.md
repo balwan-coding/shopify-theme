@@ -374,6 +374,6 @@ This theme is proprietary. Do not redistribute without license.
 
 ## 🆘 Support
 
-- Documentation: https://luminatheme.com/docs
-- Email: support@luminatheme.com
+- Documentation: ""
+- Email: balwansinghrajput1708@gmail.com
 - Issues: Include browser, Shopify plan, and screenshot
