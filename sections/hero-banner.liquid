@@ -1,0 +1,234 @@
+{% comment %}
+  Section: Hero Banner
+  Full-screen hero with animated text, CTA, and parallax effect
+{% endcomment %}
+
+{%- assign hero_height = section.settings.hero_height -%}
+
+<section
+  class="hero {% if section.settings.text_align == 'center' %}text-center{% endif %}"
+  style="
+    min-height: {{ hero_height }}vh;
+    {% if section.settings.color_scheme == 'dark' %}color: white{% endif %}
+  "
+  aria-label="Hero banner"
+>
+
+  {%- if section.settings.media_type == 'video' and section.settings.video != blank -%}
+    <div class="hero__media" aria-hidden="true">
+      {{
+        section.settings.video
+        | video_tag:
+          autoplay: true,
+          loop: true,
+          muted: true,
+          playsinline: true,
+          loading: 'eager',
+          class: 'hero__video'
+      }}
+      <div class="hero__overlay" style="background:linear-gradient(135deg,rgba(0,0,0,{{ section.settings.overlay_opacity | divided_by: 100.0 }}) 0%,rgba(0,0,0,{{ section.settings.overlay_opacity | divided_by: 200.0 }}) 100%)"></div>
+    </div>
+  {%- elsif section.settings.image != blank -%}
+    <div class="hero__media" aria-hidden="true">
+      {{
+        section.settings.image
+        | image_url: width: 2000
+        | image_tag:
+          loading: 'eager',
+          fetchpriority: 'high',
+          sizes: '100vw',
+          alt: section.settings.image.alt | default: shop.name
+      }}
+      <div class="hero__overlay" style="background:linear-gradient(135deg,rgba(0,0,0,{{ section.settings.overlay_opacity | divided_by: 100.0 }}) 0%,rgba(0,0,0,{{ section.settings.overlay_opacity | divided_by: 200.0 }}) 100%)"></div>
+    </div>
+  {%- else -%}
+    <div class="hero__media" aria-hidden="true" style="background: linear-gradient(135deg, #0f0f0f 0%, #2a2a2a 100%)"></div>
+  {%- endif -%}
+
+  <div class="container">
+    <div class="hero__content {% if section.settings.text_align == 'center' %}mx-auto{% endif %}">
+
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="hero__eyebrow eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.title != blank -%}
+        <h1 class="hero__title">
+          {%- assign title_lines = section.settings.title | newline_to_br | split: '<br />' -%}
+          {%- for line in title_lines -%}
+            <span class="hero__title-line">{{ line }}</span>
+          {%- endfor -%}
+        </h1>
+      {%- endif -%}
+
+      {%- if section.settings.subtitle != blank -%}
+        <p class="hero__subtitle">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+
+      <div class="hero__ctas">
+        {%- if section.settings.cta_primary_text != blank -%}
+          <a
+            href="{{ section.settings.cta_primary_url | default: '/collections/all' }}"
+            class="btn btn--primary btn--lg"
+          >
+            {{ section.settings.cta_primary_text }}
+          </a>
+        {%- endif -%}
+
+        {%- if section.settings.cta_secondary_text != blank -%}
+          <a
+            href="{{ section.settings.cta_secondary_url | default: '/pages/about' }}"
+            class="btn btn--secondary btn--lg"
+            style="border-color:rgba(255,255,255,0.5);color:white"
+          >
+            {{ section.settings.cta_secondary_text }}
+          </a>
+        {%- endif -%}
+      </div>
+
+    </div>
+  </div>
+
+  {%- if section.settings.show_scroll_indicator -%}
+    <div class="hero__scroll-indicator" aria-hidden="true">
+      <div class="hero__scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  {%- endif -%}
+
+</section>
+
+{% schema %}
+{
+  "name": "Hero Banner",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "select",
+      "id": "media_type",
+      "label": "Media type",
+      "options": [
+        { "value": "image", "label": "Image" },
+        { "value": "video", "label": "Video" }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Hero image"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Background video"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "default": 40,
+      "label": "Overlay opacity"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "New Collection"
+    },
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "Heading (use new lines for separate animated lines)",
+      "default": "Discover Your\nPerfect Style"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subheading",
+      "default": "Explore our curated collection of premium products designed for those who appreciate quality and style."
+    },
+    {
+      "type": "header",
+      "content": "CTAs"
+    },
+    {
+      "type": "text",
+      "id": "cta_primary_text",
+      "label": "Primary button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "cta_primary_url",
+      "label": "Primary button link"
+    },
+    {
+      "type": "text",
+      "id": "cta_secondary_text",
+      "label": "Secondary button text",
+      "default": "Our Story"
+    },
+    {
+      "type": "url",
+      "id": "cta_secondary_url",
+      "label": "Secondary button link"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "hero_height",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "default": 90,
+      "unit": "vh",
+      "label": "Hero height"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Text color",
+      "options": [
+        { "value": "dark", "label": "Light text (dark bg)" },
+        { "value": "light", "label": "Dark text (light bg)" }
+      ],
+      "default": "dark"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_scroll_indicator",
+      "default": true,
+      "label": "Show scroll indicator"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Banner"
+    }
+  ]
+}
+{% endschema %}

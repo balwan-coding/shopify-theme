@@ -1,0 +1,26 @@
+{% comment %} Section: Customer Addresses {% endcomment %}
+<section class="section">
+  <div class="container container--narrow">
+    <div class="section-header anim-fade-up" style="margin-bottom:var(--space-12)">
+      <h1>{{ 'account.addresses' | t }}</h1>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:var(--space-8)">
+      {%- for address in customer.addresses -%}
+        <div style="padding:var(--space-6);border:1px solid var(--color-border);border-radius:var(--radius-md)">
+          {{ address | format_address }}
+          <div style="margin-top:var(--space-4);display:flex;gap:var(--space-2)">
+            <a href="{{ address.url }}/edit" class="btn btn--secondary btn--sm">Edit</a>
+            <form action="{{ address.url }}" method="post" style="display:inline">
+              <input type="hidden" name="_method" value="delete">
+              <button type="submit" class="btn btn--ghost btn--sm" style="color:var(--color-error)">Delete</button>
+            </form>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+    <a href="{{ routes.account_addresses_url }}/new" class="btn btn--primary" style="margin-top:var(--space-8)">Add new address</a>
+    <p style="margin-top:var(--space-6)"><a href="{{ routes.account_url }}">← Back to account</a></p>
+  </div>
+</section>
+
+{% schema %}{"name":"Addresses","settings":[]}{% endschema %}

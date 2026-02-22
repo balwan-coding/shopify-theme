@@ -1,0 +1,54 @@
+{% comment %}
+  Section: Related Products
+{% endcomment %}
+
+{%- if product.collections.size > 0 -%}
+  {%- assign related_collection = product.collections.first -%}
+  {%- assign related_products = related_collection.products | where_exp: 'p', 'p.id != product.id' -%}
+
+  {%- if related_products.size > 0 -%}
+    <section class="section" style="background:var(--color-bg-2)" aria-labelledby="related-title">
+      <div class="container">
+        <div class="section-header anim-fade-up">
+          <span class="eyebrow">{{ section.settings.eyebrow | default: 'You May Also Like' }}</span>
+          <h2 id="related-title">{{ section.settings.title | default: 'Related Products' }}</h2>
+        </div>
+
+        <div class="products-grid products-grid--4" data-stagger="0.08">
+          {%- for related in related_products limit: section.settings.limit -%}
+            {% render 'product-card', product: related %}
+          {%- endfor -%}
+        </div>
+      </div>
+    </section>
+  {%- endif -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Related Products",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "You May Also Like"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Related Products"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "min": 2,
+      "max": 8,
+      "step": 2,
+      "default": 4,
+      "label": "Number of products"
+    }
+  ]
+}
+{% endschema %}

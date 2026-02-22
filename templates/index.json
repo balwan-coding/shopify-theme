@@ -1,0 +1,26 @@
+{
+  "sections": {
+    "hero_banner": {
+      "type": "hero-banner"
+    },
+    "featured_collections": {
+      "type": "featured-collections"
+    },
+    "featured_products": {
+      "type": "featured-products"
+    },
+    "testimonials_slider": {
+      "type": "testimonials-slider"
+    },
+    "newsletter_section": {
+      "type": "newsletter-section"
+    }
+  },
+  "order": [
+    "hero_banner",
+    "featured_collections",
+    "featured_products",
+    "testimonials_slider",
+    "newsletter_section"
+  ]
+}

@@ -1,0 +1,136 @@
+{% comment %}
+  Section: Featured Products
+  Product grid with add to cart and wishlist
+{% endcomment %}
+
+{%- assign products_per_row = section.settings.products_per_row | default: 4 -%}
+{%- assign products_to_show = section.settings.products_to_show | default: 8 -%}
+
+<section class="section" aria-labelledby="featured-products-title">
+  <div class="container">
+
+    <div class="section-header anim-fade-up">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+      <h2 id="featured-products-title">{{ section.settings.title | default: 'Best Sellers' }}</h2>
+      {%- if section.settings.subtitle != blank -%}
+        <p>{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="products-grid products-grid--{{ products_per_row }}" data-stagger="0.08">
+
+      {%- if section.settings.product_list != blank -%}
+        {%- for product in section.settings.product_list limit: products_to_show -%}
+          {% render 'product-card', product: product %}
+        {%- endfor -%}
+      {%- elsif section.settings.collection != blank -%}
+        {%- assign featured_collection = section.settings.collection -%}
+        {%- for product in featured_collection.products limit: products_to_show -%}
+          {% render 'product-card', product: product %}
+        {%- else -%}
+          {%- for i in (1..products_to_show) -%}
+            {% render 'product-card-placeholder', index: i %}
+          {%- endfor -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- assign fallback_collection = collections.all -%}
+        {%- if fallback_collection.products.size > 0 -%}
+          {%- for product in fallback_collection.products limit: products_to_show -%}
+            {% render 'product-card', product: product %}
+          {%- endfor -%}
+        {%- else -%}
+          {%- for i in (1..products_to_show) -%}
+            {% render 'product-card-placeholder', index: i %}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endif -%}
+
+    </div>
+
+    {%- if section.settings.show_view_all -%}
+      <div style="text-align:center;margin-top:var(--space-12)">
+        <a
+          href="{{ routes.all_products_collection_url }}"
+          class="btn btn--secondary btn--lg"
+        >
+          {{ section.settings.view_all_text | default: 'View All Products' }}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Featured Products",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Trending Now"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Best Sellers"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle"
+    },
+    {
+      "type": "product_list",
+      "id": "product_list",
+      "label": "Products (hand-pick specific products)",
+      "limit": 24
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Or use collection (if no products selected above)"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 4,
+      "max": 24,
+      "step": 4,
+      "default": 8,
+      "label": "Products to show"
+    },
+    {
+      "type": "select",
+      "id": "products_per_row",
+      "label": "Products per row",
+      "options": [
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "4"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "default": true,
+      "label": "Show 'View All' button"
+    },
+    {
+      "type": "text",
+      "id": "view_all_text",
+      "label": "Button text",
+      "default": "View All Products"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Products"
+    }
+  ]
+}
+{% endschema %}

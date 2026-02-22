@@ -1,0 +1,88 @@
+{% comment %}
+  Section: Recently Viewed Products
+  Products IDs are populated by JS from localStorage
+{% endcomment %}
+
+<section class="section" id="recently-viewed-section" aria-labelledby="recently-viewed-title" style="display:none">
+  <div class="container">
+    <div class="section-header">
+      <span class="eyebrow">Your History</span>
+      <h2 id="recently-viewed-title">Recently Viewed</h2>
+    </div>
+    <div class="products-grid products-grid--4" data-recently-viewed id="recently-viewed-grid">
+      <!-- Populated by JavaScript -->
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const container = document.getElementById('recently-viewed-grid');
+    const section = document.getElementById('recently-viewed-section');
+    if (!container || !section) return;
+
+    const currentId = '{{ product.id }}';
+    let ids;
+    try {
+      ids = JSON.parse(localStorage.getItem('lumina_recently_viewed') || '[]')
+        .filter(id => id !== currentId)
+        .slice(0, 4);
+    } catch { return; }
+
+    if (!ids.length) return;
+
+    section.style.display = '';
+
+    // Fetch each product via Ajax
+    const promises = ids.map(id =>
+      fetch(`/products.json?ids[]=${id}&limit=1`)
+        .then(r => r.json())
+        .catch(() => null)
+    );
+
+    const results = await Promise.all(promises);
+    const products = results
+      .filter(Boolean)
+      .flatMap(r => r.products || [])
+      .filter(Boolean);
+
+    if (!products.length) {
+      section.style.display = 'none';
+      return;
+    }
+
+    container.innerHTML = products.map(product => {
+      const price = product.variants?.[0]?.price;
+      const comparePrice = product.variants?.[0]?.compare_at_price;
+      const img = product.images?.[0];
+      const formattedPrice = price
+        ? (window.shopData?.moneyFormat || '${{amount}}').replace('{{amount}}', (price/100).toFixed(2))
+        : '';
+
+      return `
+        <article class="product-card anim-fade-up">
+          <div class="product-card__media">
+            <a href="/products/${product.handle}">
+              ${img ? `<img src="${img.src}" alt="${product.title}" loading="lazy" style="width:100%;height:100%;object-fit:cover">` : ''}
+            </a>
+          </div>
+          <div class="product-card__info">
+            <h3 class="product-card__title">
+              <a href="/products/${product.handle}">${product.title}</a>
+            </h3>
+            <div class="product-card__prices">
+              <span class="product-card__price">${formattedPrice}</span>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Recently Viewed",
+  "settings": []
+}
+{% endschema %}

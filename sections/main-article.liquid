@@ -1,0 +1,62 @@
+{% comment %}Article section{% endcomment %}
+<article class="section container container--narrow" itemscope itemtype="http://schema.org/BlogPosting">
+  <div style="margin-bottom:var(--space-8)">
+    <a href="{{ blog.url }}" style="color:var(--color-text-muted);font-size:var(--text-sm)">&larr; Back to {{ blog.title }}</a>
+  </div>
+  <header style="margin-bottom:var(--space-8)">
+    <div style="display:flex;gap:var(--space-3);align-items:center;margin-bottom:var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted)">
+      {%- for tag in article.tags limit: 1 -%}<span style="color:var(--color-accent);font-weight:600">{{ tag }}</span><span>&middot;</span>{%- endfor -%}
+      <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}" itemprop="datePublished">{{ article.published_at | date: '%B %d, %Y' }}</time>
+    </div>
+    <h1 itemprop="headline" style="margin-bottom:var(--space-4)">{{ article.title }}</h1>
+    <div style="display:flex;align-items:center;gap:var(--space-3)">
+      <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--color-bg-2)">
+        {%- if article.user.image -%}{{ article.user.image | image_url: width: 80 | image_tag: loading: 'lazy', style: 'width:100%;height:100%;object-fit:cover' }}{%- endif -%}
+      </div>
+      <span itemprop="author" style="font-weight:600;font-size:var(--text-sm)">{{ article.author }}</span>
+    </div>
+  </header>
+  {%- if article.image -%}
+    <div style="border-radius:var(--radius-lg);overflow:hidden;margin-bottom:var(--space-8);aspect-ratio:16/9">
+      {{ article.image | image_url: width: 1200 | image_tag: loading: 'eager', style: 'width:100%;height:100%;object-fit:cover', itemprop: 'image', alt: article.image.alt | default: article.title }}
+    </div>
+  {%- endif -%}
+  <div itemprop="articleBody" style="font-size:var(--text-lg);line-height:1.8;color:var(--color-text)">{{ article.content }}</div>
+  {%- if article.tags.size > 0 -%}
+    <div style="margin-top:var(--space-12);padding-top:var(--space-6);border-top:1px solid var(--color-border);display:flex;flex-wrap:wrap;gap:var(--space-2)">
+      {%- for tag in article.tags -%}
+        <a href="{{ blog.url }}/tagged/{{ tag | handle }}" style="padding:0.375rem 1rem;border:1px solid var(--color-border);border-radius:var(--radius-full);font-size:var(--text-sm);color:var(--color-text-muted);transition:all 0.2s" onmouseover="this.style.borderColor='var(--color-accent)';this.style.color='var(--color-accent)'" onmouseout="this.style.borderColor='var(--color-border)';this.style.color='var(--color-text-muted)'">{{ tag }}</a>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+  {%- if article.comments_enabled? -%}
+    <div id="comments" style="margin-top:var(--space-16)">
+      <h2 style="margin-bottom:var(--space-8)">{{ article.comments_count }} Comment{{ article.comments_count | pluralize: '', 's' }}</h2>
+      {%- paginate article.comments by 10 -%}
+        {%- for comment in article.comments -%}
+          <div style="padding:var(--space-6);border:1px solid var(--color-border);border-radius:var(--radius-lg);margin-bottom:var(--space-4)" id="comment-{{ comment.id }}">
+            <div style="display:flex;justify-content:space-between;margin-bottom:var(--space-3)">
+              <span style="font-weight:700">{{ comment.author }}</span>
+              <time style="font-size:var(--text-sm);color:var(--color-text-muted)">{{ comment.created_at | date: '%B %d, %Y' }}</time>
+            </div>
+            <p>{{ comment.content }}</p>
+          </div>
+        {%- endfor -%}
+      {%- endpaginate -%}
+      {%- form 'new_comment', article -%}
+        {%- if form.posted_successfully? -%}<p style="color:var(--color-success);margin-bottom:var(--space-4)">✓ Comment submitted for review</p>{%- endif -%}
+        <h3 style="margin-bottom:var(--space-6)">Leave a Comment</h3>
+        <div class="contact-form">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label" for="comment-author">Name *</label><input class="form-input" type="text" id="comment-author" name="comment[author]" required></div>
+            <div class="form-group"><label class="form-label" for="comment-email">Email *</label><input class="form-input" type="email" id="comment-email" name="comment[email]" required></div>
+          </div>
+          <div class="form-group"><label class="form-label" for="comment-body">Comment *</label><textarea class="form-textarea" id="comment-body" name="comment[body]" required></textarea></div>
+          <button type="submit" class="btn btn--primary">Post Comment</button>
+        </div>
+      {%- endform -%}
+    </div>
+  {%- endif -%}
+</article>
+
+{% schema %}{"name":"Article","settings":[]}{% endschema %}

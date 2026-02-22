@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}" class="no-js" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, minimum-scale=1.0">
+  <meta name="theme-color" content="{{ settings.color_primary }}">
+
+  {%- if settings.favicon != blank -%}
+    <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+  {%- endif -%}
+
+  <title>
+    {{ page_title }}
+    {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
+    {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
+    {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+  </title>
+
+  {% if page_description %}
+    <meta name="description" content="{{ page_description | escape }}">
+  {% endif %}
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="{{ canonical_url }}">
+
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://cdn.shopify.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Schema.org Structured Data -->
+  {%- if template.name == 'product' -%}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": {{ product.title | json }},
+      "url": {{ shop.url | append: product.url | json }},
+      "description": {{ product.description | strip_html | truncatewords: 100 | json }},
+      "image": [{% if product.featured_image %}{% for img in product.images limit: 5 %}{{ img | image_url: width: 800 | json }}{% unless forloop.last %},{% endunless %}{% endfor %}{% endif %}],
+      {%- if product.vendor != blank -%}"brand": {"@type": "Brand", "name": {{ product.vendor | json }}},{%- endif -%}
+      {%- if product.selected_or_first_available_variant.sku != blank -%}"sku": {{ product.selected_or_first_available_variant.sku | json }},{%- endif -%}
+      "offers": {
+        "@type": "Offer",
+        "url": {{ shop.url | append: product.url | json }},
+        "priceCurrency": {{ cart.currency.iso_code | json }},
+        "price": "{{ product.selected_or_first_available_variant.price | divided_by: 100.0 }}",
+        "availability": "https://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}",
+        "priceValidUntil": "{{ 'now' | date: '%Y' | plus: 1 }}-{{ 'now' | date: '%m-%d' }}"
+      }
+      {%- if product.metafields.reviews.rating.value != blank -%}
+      ,"aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": {{ product.metafields.reviews.rating.value | json }},
+        "reviewCount": {{ product.metafields.reviews.rating_count.value | default: 0 | json }}
+      }
+      {%- endif -%}
+    }
+    </script>
+  {%- endif -%}
+  <!-- Shop / Organization Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org/",
+    "@type": "Organization",
+    "name": {{ shop.name | json }},
+    "url": {{ shop.url | json }}{%- if shop.description != blank -%},
+    "description": {{ shop.description | json }}{%- endif -%}
+  }
+  </script>
+
+  <!-- Theme Styles -->
+  {{ 'theme.css' | asset_url | stylesheet_tag }}
+
+  <!-- GSAP CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js" defer></script>
+
+  {{ content_for_header }}
+</head>
+
+<body id="{{ page_title | handle }}" class="template-{{ template.name }}{% if customer %} customer-logged-in{% endif %}">
+
+  <!-- Skip to content -->
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <!-- Page overlay -->
+  <div id="page-overlay" class="page-overlay" aria-hidden="true"></div>
+
+  <!-- Announcement Bar -->
+  {%- section 'announcement-bar' -%}
+
+  <!-- Header -->
+  {%- section 'header' -%}
+
+  <!-- Cart Drawer -->
+  {%- section 'cart-drawer' -%}
+
+  <!-- Search Drawer -->
+  {%- section 'search-drawer' -%}
+
+  <!-- Main Content -->
+  <main id="main-content" class="main-content" tabindex="-1">
+    {{ content_for_layout }}
+  </main>
+
+  <!-- Footer -->
+  {%- section 'footer' -%}
+
+  <!-- Scroll to Top -->
+  <button class="scroll-to-top" id="scroll-to-top" aria-label="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <!-- Toast Notifications -->
+  <div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
+
+  <!-- Theme Script -->
+  <script>
+    window.shopData = {
+      shopUrl: {{ shop.url | json }},
+      moneyFormat: {{ shop.money_format | json }},
+      cartToken: {{ cart.token | json }},
+      currency: {{ cart.currency.iso_code | json }},
+      locale: {{ request.locale.iso_code | json }},
+      routesCart: '{{ routes.cart_url }}',
+      routesCartAdd: '{{ routes.cart_add_url }}',
+      routesCartChange: '{{ routes.cart_change_url }}',
+      routesSearch: '{{ routes.search_url }}',
+      customerId: {% if customer %}{{ customer.id }}{% else %}null{% endif %},
+    };
+  </script>
+  {{ 'theme.js' | asset_url | script_tag }}
+</body>
+</html>

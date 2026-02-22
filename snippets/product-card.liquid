@@ -1,0 +1,170 @@
+{% comment %}
+  Snippet: product-card
+  Usage: {% render 'product-card', product: product %}
+{% endcomment %}
+
+{%- assign badge_text = '' -%}
+{%- assign badge_class = '' -%}
+{%- assign thirty_days_ago = 'now' | date: '%s' | minus: 2592000 | plus: 0 -%}
+{%- assign product_ts = product.created_at | date: '%s' | plus: 0 -%}
+
+{%- if product.available == false -%}
+  {%- assign badge_text = 'Sold Out' -%}
+  {%- assign badge_class = 'badge--sold-out' -%}
+{%- elsif product.compare_at_price > product.price -%}
+  {%- assign savings_pct = product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price -%}
+  {%- assign badge_text = '-' | append: savings_pct | append: '%' -%}
+  {%- assign badge_class = 'badge--sale' -%}
+{%- elsif product_ts > thirty_days_ago -%}
+  {%- assign badge_text = 'New' -%}
+  {%- assign badge_class = 'badge--new' -%}
+{%- endif -%}
+
+<article class="product-card anim-fade-up" itemscope itemtype="http://schema.org/Product">
+
+  <div class="product-card__media">
+    <a href="{{ product.url }}" tabindex="-1" aria-hidden="true">
+      {%- if product.featured_media -%}
+        {{
+          product.featured_media
+          | image_url: width: 600
+          | image_tag:
+            loading: 'lazy',
+            sizes: '(max-width: 480px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw',
+            widths: '300, 400, 600, 800',
+            alt: product.featured_media.alt | default: product.title,
+            itemprop: 'image'
+        }}
+
+        {%- if product.media.size > 1 -%}
+          {{
+            product.media[1]
+            | image_url: width: 600
+            | image_tag:
+              class: 'product-card__media-alt',
+              loading: 'lazy',
+              alt: product.media[1].alt | default: product.title
+          }}
+        {%- endif -%}
+      {%- else -%}
+        {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      {%- endif -%}
+    </a>
+
+    {%- if badge_text != '' -%}
+      <div class="product-card__badges">
+        <span class="badge {{ badge_class }}">{{ badge_text }}</span>
+      </div>
+    {%- endif -%}
+
+    <div class="product-card__actions">
+      {%- if product.available -%}
+        {%- if product.variants.size == 1 -%}
+          <button
+            class="product-card__quick-add"
+            data-atc-variant-id="{{ product.selected_or_first_available_variant.id }}"
+            data-product-title="{{ product.title | escape }}"
+            aria-label="Add {{ product.title }} to cart"
+          >
+            Add to Cart
+          </button>
+        {%- else -%}
+          <a href="{{ product.url }}" class="product-card__quick-add">
+            Choose Options
+          </a>
+        {%- endif -%}
+      {%- else -%}
+        <button class="product-card__quick-add" disabled>Sold Out</button>
+      {%- endif -%}
+
+      <button
+        class="product-card__wishlist"
+        data-wishlist-btn="{{ product.id }}"
+        aria-label="Add {{ product.title | escape }} to wishlist"
+        aria-pressed="false"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="product-card__info">
+    {%- if product.vendor != blank -%}
+      <div class="product-card__vendor" itemprop="brand">{{ product.vendor }}</div>
+    {%- endif -%}
+
+    <h3 class="product-card__title" itemprop="name">
+      <a href="{{ product.url }}" itemprop="url">{{ product.title }}</a>
+    </h3>
+
+    {%- if product.metafields.reviews.rating.value != blank -%}
+      <div class="rating-stars" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
+        {%- assign rating = product.metafields.reviews.rating.value | round -%}
+        {%- for i in (1..5) -%}
+          <svg class="rating-star" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="{% if i > rating %}opacity:0.3{% endif %}">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        {%- endfor -%}
+        <span class="rating-count" itemprop="reviewCount">({{ product.metafields.reviews.rating_count.value }})</span>
+        <meta itemprop="ratingValue" content="{{ product.metafields.reviews.rating.value }}">
+      </div>
+    {%- endif -%}
+
+    <div class="product-card__prices" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+      <meta itemprop="priceCurrency" content="{{ cart.currency.iso_code }}">
+      <meta itemprop="availability" content="http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}">
+
+      {%- if product.compare_at_price > product.price -%}
+        <span class="product-card__price product-card__price--sale" itemprop="price" content="{{ product.price | divided_by: 100.0 }}">
+          {{ product.price | money }}
+        </span>
+        <span class="product-card__price product-card__price--compare">
+          {{ product.compare_at_price | money }}
+        </span>
+      {%- else -%}
+        <span class="product-card__price" itemprop="price" content="{{ product.price | divided_by: 100.0 }}">
+          {%- if product.price_varies -%}From {% endif -%}
+          {{ product.price | money }}
+        </span>
+      {%- endif -%}
+    </div>
+  </div>
+</article>
+
+<script>
+  // Quick add to cart for single-variant products
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-atc-variant-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.atcVariantId;
+        btn.disabled = true;
+        btn.textContent = '...';
+
+        try {
+          await fetch('/cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, quantity: 1 })
+          });
+
+          btn.textContent = '✓ Added';
+          setTimeout(() => {
+            btn.textContent = 'Add to Cart';
+            btn.disabled = false;
+          }, 2000);
+
+          window.LuminaCart?.fetchCart();
+          window.LuminaCart?.renderDrawerItems();
+          window.LuminaCart?.openDrawer();
+          window.LuminaToast?.show('Added to cart!', 'success');
+
+        } catch {
+          btn.textContent = 'Add to Cart';
+          btn.disabled = false;
+        }
+      });
+    });
+  });
+</script>

@@ -1,0 +1,251 @@
+{% comment %}
+  Section: Header
+  Sticky animated header with mega menu, search, cart, dark mode toggle
+{% endcomment %}
+
+<header class="site-header" role="banner" id="site-header">
+  <div class="container">
+    <div class="site-header__inner">
+
+      <!-- Navigation (left) -->
+      <nav class="site-header__nav" role="navigation" aria-label="Main navigation">
+        <ul class="nav-list" role="list">
+          {%- if section.settings.menu != blank -%}
+          {%- for link in section.settings.menu.links -%}
+            <li class="nav-item" role="none">
+              {%- if link.links.size > 0 -%}
+                <button
+                  class="nav-link"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  type="button"
+                >
+                  {{ link.title }}
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+
+                <div class="mega-menu" role="region">
+                  <div class="mega-menu__grid">
+                    {%- assign groups = link.links | group_by: 'type' -%}
+                    {%- for child_link in link.links limit: 9 -%}
+                      {%- if forloop.index0 == 0 or forloop.index0 == 3 or forloop.index0 == 6 -%}
+                        {%- unless forloop.first -%}</ul></div>{%- endunless -%}
+                        <div class="mega-menu__category">
+                          <ul style="list-style:none">
+                      {%- endif -%}
+                        <li>
+                          <a href="{{ child_link.url }}" class="mega-menu__link">
+                            {{ child_link.title }}
+                          </a>
+                        </li>
+                      {%- if forloop.last -%}
+                          </ul>
+                        </div>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </div>
+                </div>
+
+              {%- else -%}
+                <a href="{{ link.url }}" class="nav-link">{{ link.title }}</a>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+          {%- endif -%}
+        </ul>
+      </nav>
+
+      <!-- Logo (center) -->
+      <a href="{{ routes.root_url }}" class="site-header__logo" aria-label="{{ shop.name }}">
+        {%- if section.settings.logo != blank -%}
+          {{
+            section.settings.logo
+            | image_url: width: 300
+            | image_tag:
+              loading: 'eager',
+              alt: shop.name,
+              width: section.settings.logo.width,
+              height: section.settings.logo.height
+          }}
+        {%- else -%}
+          <span>{{ shop.name }}</span>
+        {%- endif -%}
+      </a>
+
+      <!-- Actions (right) -->
+      <div class="site-header__actions">
+
+        <!-- Dark mode toggle -->
+        {%- if section.settings.show_dark_mode -%}
+          <button
+            class="theme-toggle"
+            data-theme-toggle
+            aria-label="Toggle dark mode"
+            role="switch"
+            aria-checked="false"
+          >
+            <div class="theme-toggle__knob">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" style="width:10px;height:10px">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+            </div>
+          </button>
+        {%- endif -%}
+
+        <!-- Search -->
+        <button class="header-icon-btn" data-search-open aria-label="Search" aria-haspopup="dialog">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+
+        <!-- Wishlist -->
+        {%- if section.settings.show_wishlist -%}
+          <a href="/pages/wishlist" class="header-icon-btn" aria-label="Wishlist">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </a>
+        {%- endif -%}
+
+        <!-- Account -->
+        {%- if section.settings.show_account -%}
+          <a href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" class="header-icon-btn" aria-label="{%- if customer -%}Account{%- else -%}Log in{%- endif -%}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </a>
+        {%- endif -%}
+
+        <!-- Cart -->
+        <button class="header-icon-btn" data-cart-open aria-label="Cart" aria-haspopup="dialog">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span class="cart-count{% if cart.item_count > 0 %} visible{% endif %}" aria-label="{{ cart.item_count }} items in cart">
+            {{ cart.item_count }}
+          </span>
+        </button>
+
+        <!-- Mobile menu button -->
+        <button
+          class="mobile-menu-btn"
+          aria-label="Open menu"
+          aria-expanded="false"
+          aria-controls="mobile-nav"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <nav class="mobile-nav" id="mobile-nav" role="navigation" aria-label="Mobile navigation">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem">
+      <span style="font-family:var(--font-heading);font-size:1.25rem;font-weight:700">Menu</span>
+      <button class="mobile-menu-btn active" aria-label="Close menu" style="width:36px;height:36px">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <ul role="list" style="display:flex;flex-direction:column;gap:0.5rem">
+      {%- if section.settings.menu != blank -%}
+      {%- for link in section.settings.menu.links -%}
+        <li>
+          <a
+            href="{{ link.url }}"
+            style="display:flex;align-items:center;padding:0.75rem 0;font-size:1.125rem;font-weight:500;border-bottom:1px solid var(--color-border);color:var(--color-text)"
+          >
+            {{ link.title }}
+          </a>
+          {%- if link.links.size > 0 -%}
+            <ul style="padding-left:1rem;margin-top:0.5rem;display:flex;flex-direction:column;gap:0.25rem" role="list">
+              {%- for child_link in link.links -%}
+                <li>
+                  <a href="{{ child_link.url }}" style="display:block;padding:0.5rem 0;font-size:0.9375rem;color:var(--color-text-muted)">
+                    {{ child_link.title }}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+      {%- endif -%}
+    </ul>
+
+    <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--color-border);display:flex;flex-direction:column;gap:0.75rem">
+      {%- if customer -%}
+        <a href="{{ routes.account_url }}" class="btn btn--secondary btn--full">My Account</a>
+        <a href="{{ routes.account_logout_url }}" class="btn btn--ghost btn--full">Log Out</a>
+      {%- else -%}
+        <a href="{{ routes.account_login_url }}" class="btn btn--secondary btn--full">Log In</a>
+      {%- endif -%}
+    </div>
+  </nav>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "min": 80,
+      "max": 300,
+      "step": 10,
+      "default": 160,
+      "unit": "px",
+      "label": "Logo width"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "default": "main-menu",
+      "label": "Navigation menu"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dark_mode",
+      "default": true,
+      "label": "Show dark mode toggle"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "default": true,
+      "label": "Show account icon"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_wishlist",
+      "default": true,
+      "label": "Show wishlist icon"
+    }
+  ]
+}
+{% endschema %}

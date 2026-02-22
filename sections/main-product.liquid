@@ -1,0 +1,364 @@
+{% comment %}
+  Section: Main Product
+  Full product page with gallery, variants, add to cart, reviews
+{% endcomment %}
+
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+{%- assign product_form_id = 'product-form-' | append: product.id -%}
+
+<!-- Product JSON for JS -->
+<script id="product-json" type="application/json">
+  {{ product | json }}
+</script>
+
+<div class="section" data-product-id="{{ product.id }}">
+  <div class="container">
+    <div class="product-layout">
+
+      <!-- Gallery -->
+      <div class="product-gallery">
+        <div class="product-gallery__main" id="product-gallery-main">
+          {%- if product.media.size > 0 -%}
+            {{
+              product.featured_media
+              | image_url: width: 1000
+              | image_tag:
+                loading: 'eager',
+                fetchpriority: 'high',
+                sizes: '(max-width: 1024px) 100vw, 50vw',
+                widths: '500, 800, 1000',
+                alt: product.featured_media.alt | default: product.title,
+                id: 'product-gallery-main-img'
+            }}
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+          {%- endif -%}
+        </div>
+
+        {%- if product.media.size > 1 -%}
+          <div class="product-gallery__thumbs" role="list" aria-label="Product images">
+            {%- for media in product.media -%}
+              <button
+                class="product-gallery__thumb {% if forloop.first %}active{% endif %}"
+                aria-label="View image {{ forloop.index }}"
+                data-thumb-index="{{ forloop.index0 }}"
+                role="listitem"
+              >
+                {{
+                  media
+                  | image_url: width: 150
+                  | image_tag:
+                    loading: 'lazy',
+                    alt: media.alt | default: product.title,
+                    width: 80,
+                    height: 80
+                }}
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <!-- Product Info -->
+      <div class="product-info" itemscope itemtype="http://schema.org/Product">
+        <meta itemprop="name" content="{{ product.title | escape }}">
+        <meta itemprop="url" content="{{ shop.url }}{{ product.url }}">
+        <meta itemprop="image" content="{{ product.featured_image | image_url: width: 800 }}">
+
+        {%- if product.vendor -%}
+          <p class="product-info__vendor" itemprop="brand">{{ product.vendor }}</p>
+        {%- endif -%}
+
+        <h1 class="product-info__title">{{ product.title }}</h1>
+
+        {%- if product.metafields.reviews.rating.value != blank -%}
+          <div class="product-info__rating">
+            <div class="rating-stars">
+              {%- assign rating_val = product.metafields.reviews.rating.value | round -%}
+              {%- for i in (1..5) -%}
+                <svg class="rating-star" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width:16px;height:16px;{% if i > rating_val %}opacity:0.3{% endif %}">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              {%- endfor -%}
+            </div>
+            <a href="#reviews" style="font-size:var(--text-sm);color:var(--color-text-muted)">
+              {{ product.metafields.reviews.rating_count.value }} reviews
+            </a>
+          </div>
+        {%- endif -%}
+
+        <div class="product-info__prices" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+          <meta itemprop="priceCurrency" content="{{ cart.currency.iso_code }}">
+          <meta itemprop="availability" content="http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}">
+          <link itemprop="url" href="{{ shop.url }}{{ product.url }}">
+
+          <span
+            class="product-info__price{% if current_variant.compare_at_price > current_variant.price %} product-info__price--sale{% endif %}"
+            data-product-price
+            itemprop="price"
+            content="{{ current_variant.price | divided_by: 100.0 }}"
+          >
+            {{ current_variant.price | money }}
+          </span>
+
+          {%- if current_variant.compare_at_price > current_variant.price -%}
+            <span class="product-info__price product-info__price--compare" data-product-compare-price>
+              {{ current_variant.compare_at_price | money }}
+            </span>
+          {%- endif -%}
+        </div>
+
+        <!-- Product Form -->
+        {%- form 'product', product, id: product_form_id, data-product-form: '', data-atc-form: '' -%}
+          <input type="hidden" name="id" value="{{ current_variant.id }}">
+
+          {%- unless product.has_only_default_variant -%}
+
+            {%- for option in product.options_with_values -%}
+              <div class="variant-selector">
+                <p class="variant-label">
+                  {{ option.name }}
+                  <span data-option-value="{{ option.selected_value }}">{{ option.selected_value }}</span>
+                </p>
+
+                {%- if option.name == 'Color' or option.name == 'Colour' -%}
+                  <div class="variant-options" data-option-group role="group" aria-label="{{ option.name }}">
+                    {%- for value in option.values -%}
+                      <button
+                        type="button"
+                        class="variant-option color-swatch {% if value == option.selected_value %}active{% endif %}"
+                        data-variant-option
+                        data-value="{{ value }}"
+                        aria-label="{{ value }}"
+                        style="background:{{ value | downcase }}"
+                      ></button>
+                    {%- endfor -%}
+                  </div>
+                {%- else -%}
+                  <div class="variant-options" data-option-group role="group" aria-label="{{ option.name }}">
+                    {%- for value in option.values -%}
+                      <button
+                        type="button"
+                        class="variant-option {% if value == option.selected_value %}active{% endif %}"
+                        data-variant-option
+                        data-value="{{ value }}"
+                        aria-label="{{ option.name }}: {{ value }}"
+                      >
+                        {{ value }}
+                      </button>
+                    {%- endfor -%}
+                  </div>
+                {%- endif -%}
+              </div>
+            {%- endfor -%}
+
+          {%- endunless -%}
+
+          <!-- Quantity + ATC -->
+          <div class="product-info__atc">
+            <div class="quantity-control" role="group" aria-label="Quantity">
+              <button type="button" class="quantity-btn" id="qty-minus" aria-label="Decrease quantity">−</button>
+              <input
+                class="quantity-input"
+                type="number"
+                name="quantity"
+                value="1"
+                min="1"
+                aria-label="Quantity"
+                id="product-qty"
+              >
+              <button type="button" class="quantity-btn" id="qty-plus" aria-label="Increase quantity">+</button>
+            </div>
+
+            <button
+              type="submit"
+              class="atc-btn"
+              data-original-text="{% if current_variant.available %}Add to Cart{% else %}Sold Out{% endif %}"
+              {% unless current_variant.available %}disabled{% endunless %}
+              aria-label="Add {{ product.title }} to cart"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:18px;height:18px">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+              {%- if current_variant.available -%}
+                Add to Cart
+              {%- else -%}
+                Sold Out
+              {%- endif -%}
+            </button>
+            <button
+              type="submit"
+              name="add"
+              class="btn btn--accent btn--lg"
+              formaction="{{ routes.cart_add_url }}?return_to={{ routes.checkout_url }}"
+              {% unless current_variant.available %}disabled{% endunless %}
+              aria-label="Buy {{ product.title }} now"
+            >
+              {%- if current_variant.available -%}
+                Buy Now
+              {%- else -%}
+                Sold Out
+              {%- endif -%}
+            </button>
+          </div>
+
+          <!-- Wishlist -->
+          <button
+            type="button"
+            class="wishlist-btn"
+            data-wishlist-btn="{{ product.id }}"
+            aria-pressed="false"
+            aria-label="Add to wishlist"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            Save to Wishlist
+          </button>
+
+        {%- endform -%}
+
+        <!-- Product Description Accordion -->
+        <div class="product-accordion" style="margin-top:var(--space-6)">
+
+          {%- if product.description != blank -%}
+            <div class="accordion-item">
+              <button
+                type="button"
+                class="accordion-trigger"
+                aria-expanded="true"
+                aria-controls="accordion-desc"
+              >
+                Product Description
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
+              <div class="accordion-content" id="accordion-desc" aria-hidden="false">
+                <div class="accordion-body" itemprop="description">
+                  {{ product.description }}
+                </div>
+              </div>
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.shipping_text != blank -%}
+            <div class="accordion-item">
+              <button type="button" class="accordion-trigger" aria-expanded="false" aria-controls="accordion-shipping">
+                Shipping & Returns
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
+              <div class="accordion-content" id="accordion-shipping" aria-hidden="true">
+                <div class="accordion-body">{{ section.settings.shipping_text }}</div>
+              </div>
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.care_text != blank -%}
+            <div class="accordion-item">
+              <button type="button" class="accordion-trigger" aria-expanded="false" aria-controls="accordion-care">
+                Care Instructions
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
+              <div class="accordion-content" id="accordion-care" aria-hidden="true">
+                <div class="accordion-body">{{ section.settings.care_text }}</div>
+              </div>
+            </div>
+          {%- endif -%}
+
+        </div>
+
+        <!-- Trust badges -->
+        <div style="display:flex;flex-wrap:wrap;gap:var(--space-4);margin-top:var(--space-6);padding-top:var(--space-6);border-top:1px solid var(--color-border)">
+          {%- assign badges = 'Free Shipping,Secure Checkout,Easy Returns,Quality Guarantee' | split: ',' -%}
+          {%- for badge in badges -%}
+            <div style="display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);color:var(--color-text-muted);font-weight:500">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px;color:var(--color-success)">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              {{ badge }}
+            </div>
+          {%- endfor -%}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sticky ATC (mobile) -->
+<div class="sticky-atc">
+  <button
+    class="btn btn--primary btn--full btn--lg"
+    onclick="document.querySelector('.atc-btn')?.click()"
+    aria-label="Add to cart"
+  >
+    Add to Cart — {{ current_variant.price | money }}
+  </button>
+</div>
+
+<script>
+  // Quantity controls on product page
+  document.addEventListener('DOMContentLoaded', () => {
+    const qtyInput = document.getElementById('product-qty');
+    const minusBtn = document.getElementById('qty-minus');
+    const plusBtn = document.getElementById('qty-plus');
+
+    if (!qtyInput || !minusBtn || !plusBtn) return;
+
+    minusBtn.addEventListener('click', () => {
+      const val = parseInt(qtyInput.value);
+      if (val > 1) qtyInput.value = val - 1;
+    });
+
+    plusBtn.addEventListener('click', () => {
+      qtyInput.value = parseInt(qtyInput.value) + 1;
+    });
+
+    // Gallery thumbs
+    document.querySelectorAll('.product-gallery__thumb').forEach((thumb, i) => {
+      thumb.addEventListener('click', () => {
+        document.querySelectorAll('.product-gallery__thumb').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+        const src = thumb.querySelector('img')?.src?.replace('_80x80', '_1000x');
+        const mainImg = document.getElementById('product-gallery-main-img');
+        if (mainImg && src) {
+          mainImg.style.opacity = '0';
+          setTimeout(() => {
+            mainImg.src = src;
+            mainImg.style.opacity = '1';
+          }, 200);
+          mainImg.style.transition = 'opacity 0.3s ease';
+        }
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Main Product",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "shipping_text",
+      "label": "Shipping & Returns text",
+      "default": "<p>Free standard shipping on orders over $100. Returns accepted within 30 days.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "care_text",
+      "label": "Care instructions text"
+    }
+  ]
+}
+{% endschema %}

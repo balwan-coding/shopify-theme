@@ -1,0 +1,108 @@
+{% comment %}
+  Section: Newsletter
+{% endcomment %}
+
+<section class="newsletter-section" aria-labelledby="newsletter-title">
+  <div class="container container--narrow" style="text-align:center">
+
+    <span class="eyebrow" style="color:var(--color-accent);display:block;margin-bottom:var(--space-4)">{{ section.settings.eyebrow | default: 'Stay Connected' }}</span>
+
+    <h2 id="newsletter-title" style="color:white">{{ section.settings.title | default: 'Join Our Newsletter' }}</h2>
+
+    <p>{{ section.settings.subtitle | default: 'Get exclusive offers, new arrivals, and style inspiration delivered straight to your inbox.' }}</p>
+
+    {%- form 'customer', id: 'newsletter-form' -%}
+      <input type="hidden" name="contact[tags]" value="newsletter">
+
+      {%- if form.posted_successfully? -%}
+        <div style="background:rgba(34,197,94,0.2);border:1px solid rgba(34,197,94,0.4);border-radius:var(--radius-md);padding:var(--space-4);color:white;margin-bottom:var(--space-4)" role="status">
+          ✓ {{ section.settings.success_message | default: "You're subscribed! Welcome to the family." }}
+        </div>
+      {%- endif -%}
+
+      {%- if form.errors -%}
+        <div style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);border-radius:var(--radius-md);padding:var(--space-4);color:white;margin-bottom:var(--space-4)" role="alert">
+          {{ form.errors.messages.email | default: 'Please enter a valid email address.' }}
+        </div>
+      {%- endif -%}
+
+      <div class="newsletter-form">
+        <label for="newsletter-email" class="visually-hidden">Email address</label>
+        <input
+          type="email"
+          name="contact[email]"
+          id="newsletter-email"
+          class="newsletter-input"
+          placeholder="{{ section.settings.input_placeholder | default: 'Enter your email' }}"
+          autocomplete="email"
+          required
+          aria-required="true"
+        >
+        <button type="submit" class="btn btn--accent">
+          {{ section.settings.button_text | default: 'Subscribe' }}
+        </button>
+      </div>
+
+      {%- if section.settings.privacy_note != blank -%}
+        <p style="margin-top:var(--space-4);font-size:var(--text-xs);color:rgba(255,255,255,0.5)">{{ section.settings.privacy_note }}</p>
+      {%- endif -%}
+
+    {%- endform -%}
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Stay Connected"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Join Our Newsletter"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Get exclusive offers and style inspiration delivered to your inbox."
+    },
+    {
+      "type": "text",
+      "id": "input_placeholder",
+      "label": "Input placeholder",
+      "default": "Enter your email"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Subscribe"
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "Success message",
+      "default": "You're subscribed! Welcome to the family."
+    },
+    {
+      "type": "text",
+      "id": "privacy_note",
+      "label": "Privacy note",
+      "default": "We respect your privacy. Unsubscribe at any time."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Newsletter"
+    }
+  ]
+}
+{% endschema %}

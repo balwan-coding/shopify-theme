@@ -1,0 +1,76 @@
+{% comment %}
+  Section: 404 Page
+  Creative animated 404 with GSAP
+{% endcomment %}
+
+<div class="error-404">
+  <div style="text-align:center">
+    <div class="error-404__number" id="error-number" aria-hidden="true">404</div>
+    <h1 class="error-404__title">Page not found</h1>
+    <p class="error-404__text">The page you're looking for has drifted away. Let's get you back on track.</p>
+    <div style="display:flex;gap:var(--space-4);justify-content:center;flex-wrap:wrap">
+      <a href="{{ routes.root_url }}" class="btn btn--primary btn--lg">Back to Home</a>
+      <a href="{{ routes.collections_url }}" class="btn btn--secondary btn--lg">Browse Products</a>
+    </div>
+
+    {%- if section.settings.show_search -%}
+      <div style="margin-top:var(--space-12);max-width:480px;margin-inline:auto">
+        <p style="color:var(--color-text-muted);margin-bottom:var(--space-4)">Or search for what you need:</p>
+        <form action="{{ routes.search_url }}" method="get" role="search" style="display:flex;gap:var(--space-3)">
+          <input type="hidden" name="type" value="product">
+          <input
+            type="search"
+            name="q"
+            class="form-input"
+            placeholder="Search products..."
+            style="flex:1"
+            aria-label="Search products"
+          >
+          <button type="submit" class="btn btn--primary">Search</button>
+        </form>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+<style>
+  .error-404__number {
+    animation: float404 3s ease-in-out infinite;
+  }
+
+  @keyframes float404 {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof gsap === 'undefined') return;
+    
+    const tl = gsap.timeline();
+    tl.from('.error-404__number', { opacity: 0, scale: 0.5, duration: 0.8, ease: 'back.out(1.7)' })
+      .from('.error-404__title', { opacity: 0, y: 30, duration: 0.6 }, '-=0.2')
+      .from('.error-404__text', { opacity: 0, y: 20, duration: 0.5 }, '-=0.2')
+      .from('.btn', { opacity: 0, y: 20, stagger: 0.1, duration: 0.5 }, '-=0.1');
+  });
+</script>
+
+{% schema %}
+{
+  "name": "404 Page",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "default": true,
+      "label": "Show search form"
+    }
+  ],
+  "presets": [
+    {
+      "name": "404 Page"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,130 @@
+{% comment %}
+  Section: Main Blog
+{% endcomment %}
+
+<div class="blog-hero">
+  <div class="container container--narrow">
+    <span class="eyebrow anim-fade-up" style="display:block;margin-bottom:var(--space-3)">{{ blog.title }}</span>
+    <h1 class="anim-fade-up">{{ section.settings.title | default: 'Latest Stories' }}</h1>
+    {%- if section.settings.subtitle != blank -%}
+      <p class="lead anim-fade-up">{{ section.settings.subtitle }}</p>
+    {%- endif -%}
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="blog-grid" data-stagger="0.1">
+      {%- paginate blog.articles by section.settings.posts_per_page -%}
+        {%- for article in blog.articles -%}
+          <article class="article-card anim-fade-up" itemscope itemtype="http://schema.org/BlogPosting">
+            {%- if article.image -%}
+              <a href="{{ article.url }}" tabindex="-1" aria-hidden="true" class="article-card__image">
+                {{
+                  article.image
+                  | image_url: width: 800
+                  | image_tag:
+                    loading: 'lazy',
+                    sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
+                    alt: article.image.alt | default: article.title,
+                    itemprop: 'image'
+                }}
+              </a>
+            {%- else -%}
+              <div class="article-card__image" style="background:var(--color-bg-2)">
+                {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              </div>
+            {%- endif -%}
+
+            <div class="article-card__body">
+              <div class="article-card__meta">
+                {%- for tag in article.tags limit: 1 -%}
+                  <span class="article-card__tag">{{ tag }}</span>
+                  <span aria-hidden="true">·</span>
+                {%- endfor -%}
+                <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}" itemprop="datePublished">
+                  {{ article.published_at | date: '%B %d, %Y' }}
+                </time>
+              </div>
+
+              <h2 class="article-card__title" itemprop="headline">
+                <a href="{{ article.url }}" itemprop="url">{{ article.title }}</a>
+              </h2>
+
+              {%- assign excerpt_content = article.excerpt_or_content | strip_html | truncatewords: 20 -%}
+              {%- if excerpt_content != blank -%}
+                <p class="article-card__excerpt" itemprop="description">{{ excerpt_content }}</p>
+              {%- endif -%}
+
+              <div class="article-card__footer">
+                {%- if article.user.image -%}
+                  <div class="article-card__author-avatar">
+                    {{
+                      article.user.image
+                      | image_url: width: 64
+                      | image_tag: loading: 'lazy', alt: article.author, width: 32, height: 32
+                    }}
+                  </div>
+                {%- endif -%}
+                <span class="article-card__author-name" itemprop="author">{{ article.author }}</span>
+                <a href="{{ article.url }}" class="btn btn--ghost btn--sm" style="margin-left:auto">
+                  Read more →
+                </a>
+              </div>
+            </div>
+          </article>
+        {%- else -%}
+          <div style="grid-column:1/-1;text-align:center;padding:var(--space-20);color:var(--color-text-muted)">
+            No blog posts yet.
+          </div>
+        {%- endfor -%}
+
+        {%- if paginate.pages > 1 -%}
+          <nav aria-label="Pagination" style="grid-column:1/-1;display:flex;justify-content:center;gap:var(--space-2);margin-top:var(--space-8)">
+            {%- if paginate.previous -%}
+              <a href="{{ paginate.previous.url }}" class="btn btn--secondary btn--sm">← Previous</a>
+            {%- endif -%}
+            {%- for part in paginate.parts -%}
+              {%- if part.is_link -%}
+                <a href="{{ part.url }}" class="btn btn--ghost btn--sm">{{ part.title }}</a>
+              {%- else -%}
+                <span class="btn btn--primary btn--sm">{{ part.title }}</span>
+              {%- endif -%}
+            {%- endfor -%}
+            {%- if paginate.next -%}
+              <a href="{{ paginate.next.url }}" class="btn btn--secondary btn--sm">Next →</a>
+            {%- endif -%}
+          </nav>
+        {%- endif -%}
+      {%- endpaginate -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Main Blog",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Latest Stories"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle"
+    },
+    {
+      "type": "range",
+      "id": "posts_per_page",
+      "min": 3,
+      "max": 18,
+      "step": 3,
+      "default": 9,
+      "label": "Posts per page"
+    }
+  ]
+}
+{% endschema %}

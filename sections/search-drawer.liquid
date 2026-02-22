@@ -1,0 +1,117 @@
+{% comment %}
+  Section: Search Drawer
+  Ajax-powered search with live results
+{% endcomment %}
+
+<div
+  class="search-drawer"
+  id="search-drawer"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Search"
+  tabindex="-1"
+>
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4)">
+      <span style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:500">Search</span>
+      <button
+        class="header-icon-btn"
+        data-search-close
+        aria-label="Close search"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="search-drawer__input-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:24px;height:24px;color:var(--color-text-muted);flex-shrink:0">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input
+        type="search"
+        class="search-drawer__input"
+        placeholder="Search products, collections..."
+        aria-label="Search"
+        autocomplete="off"
+        role="combobox"
+        aria-expanded="false"
+        aria-autocomplete="list"
+        aria-controls="search-results"
+      >
+      <span style="font-size:var(--text-xs);color:var(--color-text-light);display:none;cursor:pointer" id="search-clear">ESC to close</span>
+    </div>
+
+    <div id="search-results" class="search-results-grid" aria-live="polite" role="listbox" aria-label="Search results">
+      {%- if section.settings.show_popular -%}
+        <div style="grid-column:1/-1;margin-bottom:var(--space-4)">
+          <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-text-light);margin-bottom:var(--space-3)">Popular searches</p>
+          <div style="display:flex;flex-wrap:wrap;gap:var(--space-2)">
+            {%- assign popular = section.settings.popular_searches | split: ',' -%}
+            {%- for term in popular -%}
+              <button
+                type="button"
+                style="padding:0.375rem 0.875rem;border:1px solid var(--color-border);border-radius:var(--radius-full);font-size:var(--text-sm);color:var(--color-text-muted);transition:all 0.2s;background:var(--color-bg)"
+                onclick="document.querySelector('.search-drawer__input').value='{{ term | strip }}'; document.querySelector('.search-drawer__input').dispatchEvent(new Event('input'))"
+                onmouseover="this.style.borderColor='var(--color-accent)';this.style.color='var(--color-accent)'"
+                onmouseout="this.style.borderColor='var(--color-border)';this.style.color='var(--color-text-muted)'"
+              >
+                {{ term | strip }}
+              </button>
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <!-- View all link -->
+    <div style="margin-top:var(--space-4);text-align:center;display:none" id="search-view-all">
+      <a href="/search?q=" id="search-view-all-link" class="btn btn--ghost btn--sm" style="color:var(--color-text-muted)">
+        View all results →
+      </a>
+    </div>
+
+    <!-- Keyboard hint -->
+    <p style="margin-top:var(--space-4);font-size:var(--text-xs);color:var(--color-text-light);text-align:center">
+      Press <kbd style="padding:2px 6px;background:var(--color-bg-2);border:1px solid var(--color-border);border-radius:3px;font-size:10px">ESC</kbd> to close
+    </p>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Update view all link dynamically
+    const input = document.querySelector('.search-drawer__input');
+    const viewAllLink = document.getElementById('search-view-all-link');
+    const viewAllEl = document.getElementById('search-view-all');
+
+    input?.addEventListener('input', () => {
+      const q = input.value.trim();
+      if (viewAllLink) viewAllLink.href = `/search?q=${encodeURIComponent(q)}&type=product`;
+      if (viewAllEl) viewAllEl.style.display = q.length > 1 ? 'block' : 'none';
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Search Drawer",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_popular",
+      "default": true,
+      "label": "Show popular searches"
+    },
+    {
+      "type": "text",
+      "id": "popular_searches",
+      "label": "Popular searches (comma separated)",
+      "default": "T-Shirts, Dresses, Jackets, Sale Items, New Arrivals"
+    }
+  ]
+}
+{% endschema %}

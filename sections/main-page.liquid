@@ -1,0 +1,23 @@
+{% comment %}
+  Section: Main Page
+  Generic page content template
+{% endcomment %}
+
+<section class="section">
+  <div class="container container--narrow">
+    <header class="section-header anim-fade-up" style="margin-bottom:var(--space-12)">
+      <h1>{{ page.title }}</h1>
+    </header>
+
+    <div class="rte anim-fade-up" style="max-width:720px">
+      {{ page.content }}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Page",
+  "settings": []
+}
+{% endschema %}

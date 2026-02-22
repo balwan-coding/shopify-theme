@@ -1,0 +1,67 @@
+{% comment %}
+  Section: Announcement Bar
+{% endcomment %}
+
+{%- if section.settings.message != blank -%}
+  <div class="announcement-bar" role="region" aria-label="Announcement">
+    <div class="container" style="display:flex;align-items:center;justify-content:center;width:100%">
+      {%- if section.settings.icon != blank -%}
+        <span style="margin-right:0.5rem" aria-hidden="true">{{ section.settings.icon }}</span>
+      {%- endif -%}
+
+      {%- if section.settings.link != blank -%}
+        <a href="{{ section.settings.link }}" style="color:inherit">{{ section.settings.message }}</a>
+      {%- else -%}
+        <p>{{ section.settings.message }}</p>
+      {%- endif -%}
+    </div>
+
+    <button class="announcement-bar__close" aria-label="Dismiss announcement">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Announcement Bar",
+  "settings": [
+    {
+      "type": "text",
+      "id": "message",
+      "label": "Message",
+      "default": "🚚 Free shipping on all orders over $100 · Use code WELCOME10 for 10% off"
+    },
+    {
+      "type": "text",
+       "id": "icon",
+       "label": "Icon"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Link"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#0f0f0f"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement Bar"
+    }
+  ]
+}
+{% endschema %}

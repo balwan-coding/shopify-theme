@@ -1,0 +1,159 @@
+{% comment %}
+  Section: Featured Collections
+  Grid of collection cards with hover effects
+{% endcomment %}
+
+<section class="section" aria-labelledby="collections-title">
+  <div class="container">
+
+    <div class="section-header anim-fade-up">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+      <h2 id="collections-title">{{ section.settings.title | default: 'Shop by Category' }}</h2>
+      {%- if section.settings.subtitle != blank -%}
+        <p>{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="collections-grid" data-stagger="0.1">
+      {%- for block in section.blocks -%}
+        {%- assign collection = block.settings.collection -%}
+
+        <a
+          href="{%- if collection != blank -%}{{ collection.url }}{%- else -%}/collections/all{%- endif -%}"
+          class="collection-card anim-scale-in anim-delay-{{ forloop.index }}"
+          {{ block.shopify_attributes }}
+        >
+          {%- if block.settings.image != blank -%}
+            {{
+              block.settings.image
+              | image_url: width: 800
+              | image_tag:
+                class: 'collection-card__image',
+                loading: 'lazy',
+                sizes: '(max-width: 768px) 100vw, 33vw',
+                alt: block.settings.title | default: collection.title
+            }}
+          {%- elsif collection != blank and collection.featured_image -%}
+            {{
+              collection.featured_image
+              | image_url: width: 800
+              | image_tag:
+                class: 'collection-card__image',
+                loading: 'lazy',
+                sizes: '(max-width: 768px) 100vw, 33vw',
+                alt: collection.title
+            }}
+          {%- else -%}
+            {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg collection-card__image' }}
+          {%- endif -%}
+
+          <div class="collection-card__overlay"></div>
+
+          <div class="collection-card__content">
+            <h3 class="collection-card__title">
+              {{ block.settings.title | default: collection.title | default: 'Collection' }}
+            </h3>
+            {%- if collection != blank -%}
+              <span class="collection-card__count">{{ collection.products_count }} products</span>
+            {%- endif -%}
+          </div>
+        </a>
+
+      {%- else -%}
+
+        {%- for i in (1..3) -%}
+          <div class="collection-card">
+            {{ 'collection-' | append: i | placeholder_svg_tag: 'placeholder-svg collection-card__image' }}
+            <div class="collection-card__overlay"></div>
+            <div class="collection-card__content">
+              <h3 class="collection-card__title">Collection {{ i }}</h3>
+              <span class="collection-card__count">—</span>
+            </div>
+          </div>
+        {%- endfor -%}
+
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.show_all_link -%}
+      <div style="text-align:center;margin-top:var(--space-10)">
+        <a href="{{ routes.collections_url }}" class="btn btn--secondary btn--lg">
+          {{ section.settings.all_link_text | default: 'View All Collections' }}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Featured Collections",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Shop by"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Category"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_all_link",
+      "default": true,
+      "label": "Show 'View All' link"
+    },
+    {
+      "type": "text",
+      "id": "all_link_text",
+      "label": "Link text",
+      "default": "View All Collections"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Override title"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Override image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Collections",
+      "blocks": [
+        { "type": "collection" },
+        { "type": "collection" },
+        { "type": "collection" }
+      ]
+    }
+  ]
+}
+{% endschema %}

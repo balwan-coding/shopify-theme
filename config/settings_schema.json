@@ -1,0 +1,193 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Arte & Cosmetica ",
+    "theme_version": "1.0.0",
+    "theme_author": "Arte & Cosmetica",
+    "theme_documentation_url": "https://arte-cosmetica.com/docs",
+    "theme_support_url": "https://arte-cosmetica.com/support"
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "color",
+        "id": "color_primary",
+        "label": "Primary color",
+        "default": "#0f0f0f"
+      },
+      {
+        "type": "color",
+        "id": "color_accent",
+        "label": "Accent color",
+        "default": "#c8a96e"
+      },
+      {
+        "type": "color",
+        "id": "color_background",
+        "label": "Background color",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "color_text",
+        "label": "Text color",
+        "default": "#0f0f0f"
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "font_picker",
+        "id": "font_body",
+        "label": "Body font",
+        "default": "inter_n4"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_heading",
+        "label": "Heading font",
+        "default": "playfair_display_n4"
+      },
+      {
+        "type": "range",
+        "id": "font_size_base",
+        "min": 14,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "label": "Base font size",
+        "default": 16
+      }
+    ]
+  },
+  {
+    "name": "Favicon",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon image"
+      }
+    ]
+  },
+  {
+    "name": "Social Media",
+    "settings": [
+      {
+        "type": "url",
+        "id": "social_instagram_url",
+        "label": "Instagram"
+      },
+      {
+        "type": "url",
+        "id": "social_facebook_url",
+        "label": "Facebook"
+      },
+      {
+        "type": "url",
+        "id": "social_twitter_url",
+        "label": "X (Twitter)"
+      },
+      {
+        "type": "url",
+        "id": "social_tiktok_url",
+        "label": "TikTok"
+      },
+      {
+        "type": "url",
+        "id": "social_pinterest_url",
+        "label": "Pinterest"
+      },
+      {
+        "type": "url",
+        "id": "social_youtube_url",
+        "label": "YouTube"
+      }
+    ]
+  },
+  {
+    "name": "Cart",
+    "settings": [
+      {
+        "type": "select",
+        "id": "cart_type",
+        "label": "Cart type",
+        "options": [
+          { "value": "drawer", "label": "Cart Drawer" },
+          { "value": "page", "label": "Cart Page" },
+          { "value": "notification", "label": "Notification only" }
+        ],
+        "default": "drawer"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_notes",
+        "label": "Enable cart notes",
+        "default": false
+      }
+    ]
+  },
+  {
+    "name": "Layout",
+    "settings": [
+      {
+        "type": "range",
+        "id": "container_max_width",
+        "min": 1100,
+        "max": 1600,
+        "step": 50,
+        "unit": "px",
+        "label": "Maximum content width",
+        "default": 1400
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_animations",
+        "label": "Enable scroll animations",
+        "default": true
+      }
+    ]
+  },
+  {
+    "name": "Checkout",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "checkout_logo",
+        "label": "Checkout logo"
+      },
+      {
+        "type": "color",
+        "id": "checkout_accent_color",
+        "label": "Checkout accent color",
+        "default": "#c8a96e"
+      }
+    ]
+  },
+  {
+    "name": "Product",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "product_show_vendor",
+        "label": "Show vendor",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "product_show_rating",
+        "label": "Show product rating",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "product_enable_zoom",
+        "label": "Enable image zoom",
+        "default": true
+      }
+    ]
+  }
+]

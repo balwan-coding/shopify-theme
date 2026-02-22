@@ -1,0 +1,190 @@
+{% comment %}
+  Section: Cart Drawer
+  Animated slide-out cart with quantity controls and discount code
+{% endcomment %}
+
+<div
+  class="cart-drawer"
+  id="cart-drawer"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Shopping cart"
+  tabindex="-1"
+>
+  <div class="cart-drawer__header">
+    <h2 class="cart-drawer__title">
+      Cart
+      <span style="font-size:var(--text-sm);font-weight:400;color:var(--color-text-muted);font-family:var(--font-body)">
+        ({{ cart.item_count }} {% if cart.item_count == 1 %}item{% else %}items{% endif %})
+      </span>
+    </h2>
+    <button
+      class="cart-drawer__close"
+      data-cart-close
+      aria-label="Close cart"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:20px;height:20px">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+  <div class="cart-drawer__items" aria-live="polite">
+    {%- if cart.item_count == 0 -%}
+      <div class="cart-empty">
+        <div class="cart-empty__icon">🛒</div>
+        <h3 class="cart-empty__title">Your cart is empty</h3>
+        <p class="cart-empty__text">Looks like you haven't added anything yet.</p>
+        <button class="btn btn--primary" data-cart-close>Continue Shopping</button>
+      </div>
+    {%- else -%}
+      {%- for item in cart.items -%}
+        <div class="cart-item" data-line="{{ forloop.index }}">
+          <div class="cart-item__image">
+            {%- if item.image -%}
+              {{
+                item.image
+                | image_url: width: 150
+                | image_tag:
+                  loading: 'lazy',
+                  width: 150,
+                  height: 150,
+                  alt: item.image.alt | default: item.product.title
+              }}
+            {%- else -%}
+              {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+            {%- endif -%}
+          </div>
+
+          <div class="cart-item__info">
+            <a href="{{ item.url }}" class="cart-item__title">{{ item.product.title }}</a>
+
+            {%- unless item.product.has_only_default_variant -%}
+              <p class="cart-item__variant">{{ item.variant.title }}</p>
+            {%- endunless -%}
+
+            {%- if item.selling_plan_allocation -%}
+              <p class="cart-item__variant">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+            {%- endif -%}
+
+            {%- unless item.line_level_discount_allocations == empty -%}
+              <ul style="list-style:none;margin-top:0.25rem">
+                {%- for discount_allocation in item.line_level_discount_allocations -%}
+                  <li style="font-size:0.75rem;color:var(--color-success)">
+                    🏷 {{ discount_allocation.discount_application.title }} (-{{ discount_allocation.amount | money }})
+                  </li>
+                {%- endfor -%}
+              </ul>
+            {%- endunless -%}
+
+            <div class="cart-item__bottom">
+              <div class="quantity-control" role="group" aria-label="Quantity for {{ item.product.title }}">
+                <button
+                  class="quantity-btn"
+                  data-qty-btn="minus"
+                  aria-label="Decrease quantity"
+                >−</button>
+                <input
+                  class="quantity-input"
+                  type="number"
+                  value="{{ item.quantity }}"
+                  min="0"
+                  aria-label="Quantity"
+                  readonly
+                >
+                <button
+                  class="quantity-btn"
+                  data-qty-btn="plus"
+                  aria-label="Increase quantity"
+                >+</button>
+              </div>
+
+              <span class="cart-item__price">{{ item.final_line_price | money }}</span>
+            </div>
+
+            <button class="cart-item__remove" data-remove-item>Remove</button>
+          </div>
+        </div>
+      {%- endfor -%}
+    {%- endif -%}
+  </div>
+
+  <div class="cart-drawer__footer">
+
+    {%- if section.settings.show_discount and cart.item_count > 0 -%}
+      <div class="cart-drawer__discount">
+        <input
+          type="text"
+          class="cart-drawer__discount-input"
+          data-discount-input
+          placeholder="Discount code"
+          aria-label="Discount code"
+          autocomplete="off"
+        >
+        <button class="btn btn--secondary btn--sm" data-discount-apply>Apply</button>
+      </div>
+    {%- endif -%}
+
+    {%- if cart.item_count > 0 -%}
+      {%- if cart.cart_level_discount_applications.size > 0 -%}
+        <div style="margin-bottom:var(--space-3)">
+          {%- for discount_application in cart.cart_level_discount_applications -%}
+            <div style="display:flex;justify-content:space-between;font-size:var(--text-sm);color:var(--color-success);padding:var(--space-2) 0">
+              <span>🏷 {{ discount_application.title }}</span>
+              <span>-{{ discount_application.total_allocated_amount | money }}</span>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      <div class="cart-drawer__subtotal">
+        <span class="cart-drawer__subtotal-label">Subtotal</span>
+        <span class="cart-drawer__subtotal-price">{{ cart.total_price | money }}</span>
+      </div>
+
+      <a href="{{ routes.checkout_url }}" class="btn btn--primary btn--full btn--lg">
+        Checkout — {{ cart.total_price | money }}
+      </a>
+
+      <a href="{{ routes.cart_url }}" class="btn btn--ghost btn--full" style="margin-top:var(--space-2)">
+        View Cart
+      </a>
+
+      <p class="cart-drawer__note">
+        {%- if section.settings.cart_note != blank -%}
+          {{ section.settings.cart_note }}
+        {%- else -%}
+          Free shipping on orders over ${{ section.settings.free_shipping_threshold }}
+        {%- endif -%}
+      </p>
+    {%- endif -%}
+
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Cart Drawer",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_discount",
+      "default": true,
+      "label": "Show discount code field"
+    },
+    {
+      "type": "number",
+      "id": "free_shipping_threshold",
+      "default": 100,
+      "label": "Free shipping threshold ($)"
+    },
+    {
+      "type": "text",
+      "id": "cart_note",
+      "label": "Cart footer note",
+      "placeholder": "Free shipping on orders over $100"
+    }
+  ]
+}
+{% endschema %}

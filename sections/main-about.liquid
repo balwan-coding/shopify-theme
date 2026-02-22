@@ -1,0 +1,227 @@
+{% comment %}
+  Section: About Page
+  Story, timeline, team sections
+{% endcomment %}
+
+<!-- Hero -->
+<div style="position:relative;min-height:60vh;display:flex;align-items:center;overflow:hidden;background:var(--color-bg-2)">
+  {%- if section.settings.hero_image != blank -%}
+    <div style="position:absolute;inset:0;z-index:0">
+      {{
+        section.settings.hero_image
+        | image_url: width: 1800
+        | image_tag: loading: 'eager', style: 'width:100%;height:100%;object-fit:cover', alt: 'About us'
+      }}
+      <div style="position:absolute;inset:0;background:rgba(0,0,0,0.45)"></div>
+    </div>
+  {%- endif -%}
+  <div class="container" style="position:relative;z-index:1;{% if section.settings.hero_image %}color:white{% endif %}">
+    <span class="eyebrow anim-fade-up" style="display:block;margin-bottom:var(--space-3)">{{ section.settings.eyebrow | default: 'Our Story' }}</span>
+    <h1 class="anim-fade-up" style="{% if section.settings.hero_image %}color:white{% endif %};max-width:700px">{{ section.settings.hero_title | default: 'Crafted with Passion' }}</h1>
+    {%- if section.settings.hero_text != blank -%}
+      <p class="anim-fade-up" style="max-width:560px;font-size:var(--text-lg);{% if section.settings.hero_image %}color:rgba(255,255,255,0.85){% else %}color:var(--color-text-muted){% endif %};margin-top:var(--space-4)">
+        {{ section.settings.hero_text }}
+      </p>
+    {%- endif -%}
+  </div>
+</div>
+
+<!-- Story Section -->
+{%- if section.settings.story_text != blank -%}
+<section class="section">
+  <div class="container container--narrow" style="text-align:center">
+    <div class="anim-fade-up">
+      {{ section.settings.story_text }}
+    </div>
+  </div>
+</section>
+{%- endif -%}
+
+<!-- Stats -->
+{%- unless section.settings.stat_1_number == blank and section.settings.stat_2_number == blank -%}
+<section style="background:var(--color-bg-2);padding:var(--space-16) 0">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-8);text-align:center" data-stagger="0.1">
+      {%- assign stat_numbers = section.settings.stat_1_number | append: ',' | append: section.settings.stat_2_number | append: ',' | append: section.settings.stat_3_number | append: ',' | append: section.settings.stat_4_number | split: ',' -%}
+      {%- assign stat_labels = section.settings.stat_1_label | append: ',' | append: section.settings.stat_2_label | append: ',' | append: section.settings.stat_3_label | append: ',' | append: section.settings.stat_4_label | split: ',' -%}
+      {%- for num in stat_numbers -%}
+        {%- if num != blank -%}
+          <div class="anim-scale-in">
+            <div style="font-family:var(--font-heading);font-size:clamp(2rem,4vw,3.5rem);font-weight:700;color:var(--color-accent)">{{ num }}</div>
+            <div style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.1em;margin-top:var(--space-2)">{{ stat_labels[forloop.index0] }}</div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+{%- endunless -%}
+
+<!-- Timeline -->
+{%- if section.blocks.size > 0 -%}
+<section class="section">
+  <div class="container">
+    <div class="section-header anim-fade-up">
+      <span class="eyebrow">{{ section.settings.timeline_eyebrow | default: 'Our Journey' }}</span>
+      <h2>{{ section.settings.timeline_title | default: 'How We Got Here' }}</h2>
+    </div>
+
+    <div class="timeline">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'timeline_item' -%}
+          <div class="timeline-item anim-{% cycle 'slide-left', 'slide-right' %}" {{ block.shopify_attributes }}>
+           {%- assign remainder = forloop.index0 | modulo: 2 -%}
+           {%- if remainder == 0 -%}
+             <div class="timeline-item__content">
+               <p class="eyebrow" style="display:block;margin-bottom:var(--space-2)">
+                 {{ block.settings.year }}
+               </p>
+               <h3 style="margin-bottom:var(--space-2)">
+                 {{ block.settings.title }}
+               </h3>
+               <p style="color:var(--color-text-muted);font-size:var(--text-sm)">
+                 {{ block.settings.text }}
+               </p>
+             </div>
+           {%- endif -%}
+
+            <div class="timeline-item__center">
+              <div class="timeline-dot" aria-hidden="true"></div>
+            </div>
+
+            {%- if remainder != 0 -%}
+              <div class="timeline-item__content">
+                <p class="eyebrow" style="display:block;margin-bottom:var(--space-2)">{{ block.settings.year }}</p>
+                <h3 style="margin-bottom:var(--space-2)">{{ block.settings.title }}</h3>
+                <p style="color:var(--color-text-muted);font-size:var(--text-sm)">{{ block.settings.text }}</p>
+              </div>
+            {%- else -%}
+              <div></div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+{%- endif -%}
+
+<!-- Team -->
+{%- assign team_members = section.blocks | where: 'type', 'team_member' -%}
+{%- if team_members.size > 0 -%}
+<section class="section" style="background:var(--color-bg-2)">
+  <div class="container">
+    <div class="section-header anim-fade-up">
+      <span class="eyebrow">{{ section.settings.team_eyebrow | default: 'Meet the Team' }}</span>
+      <h2>{{ section.settings.team_title | default: 'The People Behind the Brand' }}</h2>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-8)" data-stagger="0.1">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'team_member' -%}
+          <div style="text-align:center" class="anim-fade-up" {{ block.shopify_attributes }}>
+            <div style="width:160px;height:160px;border-radius:50%;overflow:hidden;margin:0 auto var(--space-4);background:var(--color-bg-3)">
+              {%- if block.settings.photo != blank -%}
+                {{
+                  block.settings.photo
+                  | image_url: width: 320
+                  | image_tag: loading: 'lazy', alt: block.settings.name, style: 'width:100%;height:100%;object-fit:cover'
+                }}
+              {%- else -%}
+                {{ 'customer' | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+            </div>
+            <h3 style="font-size:var(--text-lg);margin-bottom:var(--space-1)">{{ block.settings.name }}</h3>
+            <p style="color:var(--color-accent);font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-2)">{{ block.settings.role }}</p>
+            {%- if block.settings.bio != blank -%}
+              <p style="font-size:var(--text-sm);color:var(--color-text-muted)">{{ block.settings.bio }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "About Page",
+  "settings": [
+    {
+      "type": "header", "content": "Hero"
+    },
+    {
+      "type": "image_picker", "id": "hero_image", "label": "Hero image"
+    },
+    {
+      "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Our Story"
+    },
+    {
+      "type": "text", "id": "hero_title", "label": "Hero title", "default": "Crafted with Passion"
+    },
+    {
+      "type": "textarea", "id": "hero_text", "label": "Hero subtitle"
+    },
+    {
+      "type": "header", "content": "Story"
+    },
+    {
+      "type": "richtext", "id": "story_text", "label": "Story text"
+    },
+    {
+      "type": "header", "content": "Stats"
+    },
+    { "type": "text", "id": "stat_1_number", "label": "Stat 1 number", "default": "10k+" },
+    { "type": "text", "id": "stat_1_label", "label": "Stat 1 label", "default": "Happy Customers" },
+    { "type": "text", "id": "stat_2_number", "label": "Stat 2 number", "default": "500+" },
+    { "type": "text", "id": "stat_2_label", "label": "Stat 2 label", "default": "Products" },
+    { "type": "text", "id": "stat_3_number", "label": "Stat 3 number", "default": "15+" },
+    { "type": "text", "id": "stat_3_label", "label": "Stat 3 label", "default": "Years Experience" },
+    { "type": "text", "id": "stat_4_number", "label": "Stat 4 number", "default": "50+" },
+    { "type": "text", "id": "stat_4_label", "label": "Stat 4 label", "default": "Countries" },
+    {
+      "type": "header", "content": "Timeline"
+    },
+    { "type": "text", "id": "timeline_eyebrow", "label": "Timeline eyebrow", "default": "Our Journey" },
+    { "type": "text", "id": "timeline_title", "label": "Timeline title", "default": "How We Got Here" },
+    {
+      "type": "header", "content": "Team"
+    },
+    { "type": "text", "id": "team_eyebrow", "label": "Team eyebrow", "default": "The Team" },
+    { "type": "text", "id": "team_title", "label": "Team title", "default": "Meet the People Behind the Brand" }
+  ],
+  "blocks": [
+    {
+      "type": "timeline_item",
+      "name": "Timeline Item",
+      "settings": [
+        { "type": "text", "id": "year", "label": "Year", "default": "2015" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Our Beginning" },
+        { "type": "textarea", "id": "text", "label": "Description" }
+      ]
+    },
+    {
+      "type": "team_member",
+      "name": "Team Member",
+      "settings": [
+        { "type": "image_picker", "id": "photo", "label": "Photo" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Team Member" },
+        { "type": "text", "id": "role", "label": "Role", "default": "Founder" },
+        { "type": "textarea", "id": "bio", "label": "Bio" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "About Page",
+      "blocks": [
+        { "type": "timeline_item" },
+        { "type": "timeline_item" },
+        { "type": "team_member" },
+        { "type": "team_member" }
+      ]
+    }
+  ]
+}
+{% endschema %}

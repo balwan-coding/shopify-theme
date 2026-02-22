@@ -1,0 +1,39 @@
+{% layout none %}
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ 'gift_cards.issued.title' | t: value: gift_card.balance | money_without_trailing_zeros, shop: shop.name }}</title>
+  {%- if settings.favicon != blank -%}
+    <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+  {%- endif -%}
+  {{ content_for_header }}
+  <style>
+    :root { --color-bg: #ffffff; --color-text: #0f0f0f; --color-accent: #c8a96e; --font-body: 'Inter', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--color-bg); color: var(--color-text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .gift-card { max-width: 480px; width: 100%; text-align: center; padding: 2rem; border: 1px solid #e8e8e4; border-radius: 8px; }
+    .gift-card__balance { font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; }
+    .gift-card__code { font-family: monospace; font-size: 1.25rem; padding: 0.75rem 1rem; background: #f8f8f6; border-radius: 4px; margin: 1rem 0; letter-spacing: 0.1em; }
+    .gift-card__copy { margin-top: 1rem; padding: 0.75rem 1.5rem; background: var(--color-text); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.875rem; }
+    .gift-card__shop { display: inline-block; margin-top: 1.5rem; color: var(--color-accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="gift-card">
+    <h1>{{ shop.name }}</h1>
+    <p class="gift-card__balance">{{ gift_card.balance | money }}</p>
+    {%- if gift_card.enabled == false or gift_card.expired -%}
+      <p>{{ 'gift_cards.issued.expired' | t }}</p>
+    {%- endif -%}
+    {%- if gift_card.expires_on -%}
+      <p>{{ 'gift_cards.issued.expiration_date' | t: expires_on: gift_card.expires_on | date: '%B %e, %Y' }}</p>
+    {%- endif -%}
+    <p>{{ 'gift_cards.issued.how_to_use_gift_card' | t }}</p>
+    <div class="gift-card__code" id="gift-card-code">{{ gift_card.code | format_code }}</div>
+    <button type="button" class="gift-card__copy" onclick="navigator.clipboard.writeText(document.getElementById('gift-card-code').innerText)">{{ 'gift_cards.issued.copy_code' | t }}</button>
+    <a href="{{ shop.url }}" class="gift-card__shop">{{ 'gift_cards.issued.shop_link' | t }}</a>
+  </div>
+</body>
+</html>

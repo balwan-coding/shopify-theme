@@ -1,0 +1,63 @@
+{% comment %}
+  Section: Main Search
+  Search results page
+{% endcomment %}
+
+<div class="section">
+  <div class="container">
+    <div class="section-header anim-fade-up" style="margin-bottom:var(--space-12)">
+      <h1>
+        {%- if search.performed -%}
+          Search results for "{{ search.terms | escape }}"
+        {%- else -%}
+          Search
+        {%- endif -%}
+      </h1>
+    </div>
+
+    <form action="{{ routes.search_url }}" method="get" role="search" style="max-width:600px;margin-bottom:var(--space-12)">
+      <div style="display:flex;gap:var(--space-3)">
+        <input type="hidden" name="type" value="product">
+        <input
+          type="search"
+          name="q"
+          value="{{ search.terms | escape }}"
+          placeholder="Search products..."
+          class="form-input"
+          style="flex:1"
+          aria-label="Search"
+        >
+        <button type="submit" class="btn btn--primary">Search</button>
+      </div>
+    </form>
+
+    {%- if search.performed -%}
+      {%- if search.results_count > 0 -%}
+        <p style="color:var(--color-text-muted);margin-bottom:var(--space-8)">{{ search.results_count }} results found</p>
+        <div class="products-grid products-grid--4">
+          {%- for item in search.results -%}
+            {%- if item.object_type == 'product' -%}
+              {% render 'product-card', product: item %}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- else -%}
+        <div style="text-align:center;padding:var(--space-20);color:var(--color-text-muted)">
+          <p style="font-size:var(--text-xl);margin-bottom:var(--space-4)">No results found for "{{ search.terms | escape }}"</p>
+          <a href="{{ routes.all_products_collection_url }}" class="btn btn--secondary">Browse all products</a>
+        </div>
+      {%- endif -%}
+    {%- else -%}
+      <div style="text-align:center;padding:var(--space-20);color:var(--color-text-muted)">
+        <p style="font-size:var(--text-lg)">Enter a search term above to find products.</p>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Search",
+  "settings": []
+}
+{% endschema %}

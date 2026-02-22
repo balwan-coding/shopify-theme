@@ -1,0 +1,16 @@
+{
+  "current": {
+    "color_primary": "#0f0f0f",
+    "color_accent": "#c8a96e",
+    "color_background": "#ffffff",
+    "color_text": "#0f0f0f",
+    "font_size_base": 16,
+    "container_max_width": 1400,
+    "enable_animations": true,
+    "cart_type": "drawer",
+    "cart_notes": false,
+    "product_show_vendor": true,
+    "product_show_rating": true,
+    "product_enable_zoom": true
+  }
+}
